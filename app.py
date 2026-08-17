@@ -1,64 +1,65 @@
-import streamlit as st
-import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import streamlit as st
 
 # Set page title and layout
-st.set_page_config(
-    page_title="My Streamlit App",
-    page_icon="🚀",
-    layout="centered"
+st.set_page_config(page_title="Function Plotter", layout="centered")
+
+st.title("📈 Interactive Function Plotter")
+st.write("Visualize mathematical functions dynamically.")
+
+# Sidebar controls for customization
+st.sidebar.header("Plot Settings")
+
+# Dropdown for common mathematical functions
+function_option = st.sidebar.selectbox(
+    "Select a function to plot:",
+    [
+        "Sine: sin(x)",
+        "Cosine: cos(x)",
+        "Polynomial: x^2 - 4x + 3",
+        "Exponential: exp(x)",
+        "Damped Sine Wave: exp(-0.2*x) * sin(2*x)",
+    ],
 )
 
-# Title and description
-st.title("🚀 Simple Streamlit Web App")
-st.write("Welcome! This is a simple interactive web application built entirely in Python.")
+# Range and resolution sliders
+x_min = st.sidebar.number_input("X Minimum", value=-10.0, step=1.0)
+x_max = st.sidebar.number_input("X Maximum", value=10.0, step=1.0)
+points = st.sidebar.slider(
+    "Resolution (number of points)", min_value=100, max_value=2000, value=500
+)
 
-# Sidebar navigation
-st.sidebar.header("Navigation")
-page = st.sidebar.radio("Go to section:", ["Home", "Data Visualizer", "User Input"])
+# Generate X values
+x = np.linspace(x_min, x_max, points)
 
-# Section 1: Home
-if page == "Home":
-    st.header("Home Page")
-    st.write("Streamlit allows you to turn Python scripts into interactive web apps in minutes.")
-    st.info("Use the sidebar on the left to navigate between different sections!")
+# Calculate Y values based on selection
+if function_option == "Sine: sin(x)":
+    y = np.sin(x)
+    title = r"$y = \sin(x)$"
+elif function_option == "Cosine: cos(x)":
+    y = np.cos(x)
+    title = r"$y = \cos(x)$"
+elif function_option == "Polynomial: x^2 - 4x + 3":
+    y = x**2 - 4 * x + 3
+    title = r"$y = x^2 - 4x + 3$"
+elif function_option == "Exponential: exp(x)":
+    y = np.exp(x)
+    title = r"$y = e^x$"
+elif function_option == "Damped Sine Wave: exp(-0.2*x) * sin(2*x)":
+    y = np.exp(-0.2 * x) * np.sin(2 * x)
+    title = r"$y = e^{-0.2x} \cdot \sin(2x)$"
 
-# Section 2: Data Visualizer
-elif page == "Data Visualizer":
-    st.header("📊 Interactive Data Visualizer")
-    
-    st.write("Generate random data and visualize it on the fly:")
-    
-    # Slider control for data points
-    num_points = st.slider("Select number of data points:", min_value=10, max_value=200, value=50)
-    
-    # Generate random line chart data
-    chart_data = pd.DataFrame(
-        np.random.randn(num_points, 3),
-        columns=['Metric A', 'Metric B', 'Metric C']
-    )
-    
-    st.line_chart(chart_data)
-    
-    # Toggle to view raw data table
-    if st.checkbox("Show raw data table"):
-        st.dataframe(chart_data)
+# Create matplotlib figure
+fig, ax = plt.subplots(figsize=(8, 4.5))
+ax.plot(x, y, label=function_option, color="#1f77b4", linewidth=2)
+ax.axhline(0, color="black", linewidth=0.8, linestyle="--")
+ax.axvline(0, color="black", linewidth=0.8, linestyle="--")
+ax.set_title(title, fontsize=14)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.grid(True, linestyle=":", alpha=0.6)
+ax.legend()
 
-# Section 3: User Input
-elif page == "User Input":
-    st.header("📝 Interactive Form")
-    
-    with st.form("user_info_form"):
-        name = st.text_input("Enter your name:")
-        role = st.selectbox("Select your role:", ["Developer", "Data Scientist", "Student", "Other"])
-        satisfaction = st.slider("How much do you like Python?", 1, 10, 8)
-        
-        submitted = st.form_submit_button("Submit")
-        
-        if submitted:
-            st.success(f"Hello **{name}**! Your response has been recorded.")
-            st.json({
-                "Name": name,
-                "Role": role,
-                "Python Score": satisfaction
-            })
+# Display plot in Streamlit app
+st.pyplot(fig)
