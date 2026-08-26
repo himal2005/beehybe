@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import re
 
 # Page Configuration
 st.set_page_config(page_title="Card Game Arcade", page_icon="🃏", layout="wide")
@@ -25,7 +26,7 @@ def create_deck():
     return [f"{rank}{suit}" for suit in SUITS for rank in RANKS]
 
 def card_value_bj(card):
-    rank = card[:-2] if len(card) == 4 else card[:-1]
+    rank = re.match(r"^[0-9JQKA]+", card).group(0)
     if rank in ['J', 'Q', 'K']:
         return 10
     elif rank == 'A':
@@ -34,7 +35,7 @@ def card_value_bj(card):
 
 def calculate_bj_score(hand):
     score = sum(card_value_bj(c) for c in hand)
-    aces = sum(1 for c in hand if c.startswith('A'))
+    aces = sum(1 for c in hand if re.match(r"^A", c))
     while score > 21 and aces:
         score -= 10
         aces -= 1
